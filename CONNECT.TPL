@@ -1,5 +1,5 @@
-H    1   0.30
-D    1   0.30
+H    1   0.40  // increased from 0.3 to 0.4
+D    1   0.40  // increased from 0.3 to 0.4
 C    6   0.85
 N    7   0.78
 O    8   0.85
