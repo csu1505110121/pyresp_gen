@@ -19,6 +19,23 @@ def flatten_list(_2d_list):
 			flat_list.append(element)
 	return flat_list
 
+def readconnectTBL(filename='./CONNECT.TPL'):
+	TBL = {'elem_syl':[],'elem_num':[],'elem_radii':[]}
+	with open(filename,'r') as f:
+		while True:
+			line = f.readline()
+			if not line:
+				break
+			else:
+				if '//' not in line[:5]:
+					TBL['elem_syl'].append(line.split()[0])
+					TBL['elem_num'].append(int(line.split()[1]))
+					TBL['elem_radii'].append(float(line.split()[2]))
+		else:
+			print('ERROR: could not find **CONNECT.TBL**',end='\n')
+	
+	TBL = pd.DataFrame(data=TBL)
+	return TBL
 
 
 def getINFO(espdat):
@@ -630,3 +647,5 @@ if __name__ == '__main__':
 	print(in1_idx_dipole)
 	print(in2_idx_dipole)
 	#print(equAtmMap.shape[0],equAtmMap.shape[1])
+	TBL = readconnectTBL('./CONNECT.TPL')
+	print(TBL)
