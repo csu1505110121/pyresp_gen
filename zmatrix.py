@@ -6,6 +6,7 @@ import pandas as pd
 from scipy.spatial import distance_matrix
 from constant import *
 from collections import Counter
+from constant_radii import tbl
 
 def flatten_list(_2d_list):
 	flat_list = []
@@ -19,7 +20,7 @@ def flatten_list(_2d_list):
 			flat_list.append(element)
 	return flat_list
 
-def readconnectTBL(filename='./CONNECT.TPL'):
+def readconnectTBL(filename='CONNECT.TPL'):
 	TBL = {'elem_syl':[],'elem_num':[],'elem_radii':[]}
 	with open(filename,'r') as f:
 		while True:
@@ -77,7 +78,8 @@ def distMatrix(xyz):
 	return dmat
 
 #def getBOND(xyz,bcut=1.55,fconnecttbl='./CONNECT.TPL'):
-def getBOND(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
+#def getBOND(xyz,fconnecttbl='CONNECT.TPL'): # No need for cutoff again
+def getBOND(xyz,dtbl=tbl): # No need for cutoff again
 	"""
 		get bond number of a certain molecule
 		bcut: cutoff in the unit of angstrom
@@ -90,7 +92,8 @@ def getBOND(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
 	#Nbond_new = 0      # for testing the new function
 	dmat = distMatrix(xyz)
 	# read the atom radii from CONNECT.TPL
-	tpl = readconnectTBL(fconnecttbl)
+	#tpl = readconnectTBL(fconnecttbl)
+	tpl = pd.DataFrame(data=dtbl,columns=['elem_syl','elem_num','elem_radii'])
 	ref_range = [0.0, 1.5, 1.9, 2.05]
 	bnl_offset_fact = [0.15, 0.11, 0.09, 0.08]
 
@@ -183,7 +186,7 @@ def getBOND(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
 
 
 #def getCONN(xyz,bcut=1.55,fconnecttbl='./CONNECT.TPL'):
-def getCONN(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
+def getCONN(xyz,dtbl=tbl): # No need for cutoff again
 	"""
 		get bond number of a certain molecule
 		bcut: cutoff in the unit of angstrom
@@ -214,7 +217,8 @@ def getCONN(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
 	a,b = dmat.shape[0], dmat.shape[1]
 
 	# read the atom radii from CONNECT.TPL
-	tpl = readconnectTBL(fconnecttbl)
+	#tpl = readconnectTBL(fconnecttbl)
+	tpl = pd.DataFrame(data=dtbl,columns=['elem_syl','elem_num','elem_radii'])
 	ref_range = [0.0, 1.5, 1.9, 2.05]
 	bnl_offset_fact = [0.15, 0.11, 0.09, 0.08]
 	
