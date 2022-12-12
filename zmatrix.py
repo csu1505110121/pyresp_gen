@@ -76,7 +76,8 @@ def distMatrix(xyz):
 	dmat = pd.DataFrame(data=dmat, columns=xyz['syl'].values, index=xyz['ida'].values)
 	return dmat
 
-def getBOND(xyz,bcut=1.55):
+#def getBOND(xyz,bcut=1.55,fconnecttbl='./CONNECT.TPL'):
+def getBOND(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
 	"""
 		get bond number of a certain molecule
 		bcut: cutoff in the unit of angstrom
@@ -86,77 +87,103 @@ def getBOND(xyz,bcut=1.55):
 		http://www.csb.yale.edu/userguides/datamanip/uppsala/manuals.20020128/typical_bonds.html
 	"""
 	Nbond = 0
+	#Nbond_new = 0      # for testing the new function
 	dmat = distMatrix(xyz)
+	# read the atom radii from CONNECT.TPL
+	tpl = readconnectTBL(fconnecttbl)
+	ref_range = [0.0, 1.5, 1.9, 2.05]
+	bnl_offset_fact = [0.15, 0.11, 0.09, 0.08]
+
 	a,b = dmat.shape[0], dmat.shape[1]
 	#print(a,b)
 	for i in range(a):
 		for j in range(b):
 			if i > j:
-				# criterion for C-C single bond
-				if dmat.index[i] ==6 and dmat.index[j] == 6:
-						if dmat.iloc[i][j] < 1.55:
-							Nbond +=1
-				# criterion for N-N single bond
-				elif dmat.index[i] ==7 and dmat.index[j] == 7:
-						if dmat.iloc[i][j] < 1.36:
-							Nbond +=1
-				# criterion for S-S single bond
-				elif dmat.index[i] == 16 and dmat.index[j] == 16:
-						if dmat.iloc[i][j] < 2.08:
-							Nbond +=1
-				# criterion for C-O or O-C single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 8) or (dmat.index[i] ==8 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.44:
-							Nbond +=1
-				# criterion for C-N or N-C single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.48:
-							Nbond +=1
-				# criterion for X-H, where X is not H
-				elif (dmat.index[i] !=1 and dmat.index[j] == 1) or (dmat.index[i] ==1 and dmat.index[j] != 1) :
-						if dmat.iloc[i][j] < 1.36:
-							Nbond +=1
-				# criterion for O-N or N-O single bond
-				elif (dmat.index[i] ==8 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 8) :
-						if dmat.iloc[i][j] < 1.25:
-							Nbond +=1
-				# criterion for O-P or P-O single bond
-				elif (dmat.index[i] ==8 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 8) :
-						if dmat.iloc[i][j] < 1.64:
-							Nbond +=1
-				# criterion for C-Br single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 35) or (dmat.index[i] ==35 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.95:
-							Nbond +=1
-				# criterion for C-F single bond 
-				#           the length threshold was increased from 1.38 to 1.39
-				elif (dmat.index[i] ==6 and dmat.index[j] == 9) or (dmat.index[i] ==9 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.39:
-							Nbond +=1
-				# criterion for C-Cl single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 17) or (dmat.index[i] ==17 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.77:
-							Nbond +=1
-				# criterion for C-I single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 53) or (dmat.index[i] ==53 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 2.15:
-							Nbond +=1
-				# criterion for C-P single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.85:
-							Nbond +=1
-				# criterion for C-S single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 16) or (dmat.index[i] ==16 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.83:
-							Nbond +=1
-				# for missing cases!
-				else:
-					if dmat.iloc[i][j] < bcut:
-						Nbond+=1
+				## the following logic was copied directly from Yong Duan's pol_resp code
+				ref = tpl.loc[tpl['elem_num']==dmat.index[i]]['elem_radii'].values[0] + tpl.loc[tpl['elem_num']==dmat.index[j]]['elem_radii'].values[0]
+				for num_i in range(len(ref_range)):
+					if num_i < len(ref_range) -1:
+						if ref > ref_range[num_i] and ref <= ref_range[num_i+1]:
+							offsetfact = bnl_offset_fact[num_i]
+							offset = ref*offsetfact
+							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+								#print('Atom {} - Atom {}'.format(i,j))
+								Nbond+=1
+					else:
+						if ref > ref_range[num_i]:
+							offsetfact = bnl_offset_fact[num_i]
+							offset = ref*offsetfact
+							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+								#print('Atom {} - Atom {}'.format(i,j))
+								Nbond+=1
+				
+			#	# criterion for C-C single bond
+			#	if dmat.index[i] ==6 and dmat.index[j] == 6:
+			#			if dmat.iloc[i][j] < 1.55:
+			#				Nbond +=1
+			#	# criterion for N-N single bond
+			#	elif dmat.index[i] ==7 and dmat.index[j] == 7:
+			#			if dmat.iloc[i][j] < 1.36:
+			#				Nbond +=1
+			#	# criterion for S-S single bond
+			#	elif dmat.index[i] == 16 and dmat.index[j] == 16:
+			#			if dmat.iloc[i][j] < 2.08:
+			#				Nbond +=1
+			#	# criterion for C-O or O-C single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 8) or (dmat.index[i] ==8 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.44:
+			#				Nbond +=1
+			#	# criterion for C-N or N-C single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.48:
+			#				Nbond +=1
+			#	# criterion for X-H, where X is not H
+			#	elif (dmat.index[i] !=1 and dmat.index[j] == 1) or (dmat.index[i] ==1 and dmat.index[j] != 1) :
+			#			if dmat.iloc[i][j] < 1.36:
+			#				Nbond +=1
+			#	# criterion for O-N or N-O single bond
+			#	elif (dmat.index[i] ==8 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 8) :
+			#			if dmat.iloc[i][j] < 1.25:
+			#				Nbond +=1
+			#	# criterion for O-P or P-O single bond
+			#	elif (dmat.index[i] ==8 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 8) :
+			#			if dmat.iloc[i][j] < 1.64:
+			#				Nbond +=1
+			#	# criterion for C-Br single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 35) or (dmat.index[i] ==35 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.95:
+			#				Nbond +=1
+			#	# criterion for C-F single bond 
+			#	#           the length threshold was increased from 1.38 to 1.39
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 9) or (dmat.index[i] ==9 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.39:
+			#				Nbond +=1
+			#	# criterion for C-Cl single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 17) or (dmat.index[i] ==17 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.77:
+			#				Nbond +=1
+			#	# criterion for C-I single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 53) or (dmat.index[i] ==53 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 2.15:
+			#				Nbond +=1
+			#	# criterion for C-P single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.85:
+			#				Nbond +=1
+			#	# criterion for C-S single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 16) or (dmat.index[i] ==16 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.83:
+			#				Nbond +=1
+			#	# for missing cases!
+			#	else:
+			#		if dmat.iloc[i][j] < bcut:
+			#			Nbond+=1
+	#print('Old Bond Num: {}, New: {}'.format(Nbond, Nbond_new))
 	return Nbond
 
 
-def getCONN(xyz,bcut=1.55):
+#def getCONN(xyz,bcut=1.55,fconnecttbl='./CONNECT.TPL'):
+def getCONN(xyz,fconnecttbl='./CONNECT.TPL'): # No need for cutoff again
 	"""
 		get bond number of a certain molecule
 		bcut: cutoff in the unit of angstrom
@@ -185,115 +212,142 @@ def getCONN(xyz,bcut=1.55):
 	# constructing the distance matrix
 	dmat = distMatrix(xyz)
 	a,b = dmat.shape[0], dmat.shape[1]
+
+	# read the atom radii from CONNECT.TPL
+	tpl = readconnectTBL(fconnecttbl)
+	ref_range = [0.0, 1.5, 1.9, 2.05]
+	bnl_offset_fact = [0.15, 0.11, 0.09, 0.08]
+	
 	#print(a,b)
 	for i in range(a):
 		for j in range(b):
 			if i != j:
-				# criterion for C-C single bond
-				if dmat.index[i] ==6 and dmat.index[j] == 6:
-						if dmat.iloc[i][j] < 1.55:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-				# criterion for N-N single bond
-				elif dmat.index[i] ==7 and dmat.index[j] == 7:
-						if dmat.iloc[i][j] < 1.36:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for S-S single bond
-				elif dmat.index[i] == 16 and dmat.index[j] == 16:
-						if dmat.iloc[i][j] < 2.08:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-O or O-C single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 8) or (dmat.index[i] ==8 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.44:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-N or N-C single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.48:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for X-H, where X is not H
-				elif (dmat.index[i] !=1 and dmat.index[j] == 1) or (dmat.index[i] ==1 and dmat.index[j] != 1) :
-						if dmat.iloc[i][j] < 1.36:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for O-N or N-O single bond
-				elif (dmat.index[i] ==8 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 8) :
-						if dmat.iloc[i][j] < 1.25:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for O-P or P-O single bond
-				elif (dmat.index[i] ==8 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 8) :
-						if dmat.iloc[i][j] < 1.64:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-Br single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 35) or (dmat.index[i] ==35 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.95:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-F single bond
-				#              the bond length increased from 1.38 to 1.39
-				elif (dmat.index[i] ==6 and dmat.index[j] == 9) or (dmat.index[i] ==9 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.39:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-Cl single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 17) or (dmat.index[i] ==17 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.77:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-I single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 53) or (dmat.index[i] ==53 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 2.15:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-P single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.85:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# criterion for C-S single bond
-				elif (dmat.index[i] ==6 and dmat.index[j] == 16) or (dmat.index[i] ==16 and dmat.index[j] == 6) :
-						if dmat.iloc[i][j] < 1.83:
-							connect[i].append(j)
-							conAtm[i].append(mapAtmType[j])
-							conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-							#conIdx[i].append(mapAtmIdx[j])
-				# for missing cases!
-				else:
-					if dmat.iloc[i][j] < bcut:
-						connect[i].append(j)
-						conAtm[i].append(mapAtmType[j])
-						conIdx[i].append(mapAtmIdx[mapAtmType[j]])
-						#conIdx[i].append(mapAtmIdx[j])
+				## the following logic was copied directly from Yong Duan's pol_resp code
+				ref = tpl.loc[tpl['elem_num']==dmat.index[i]]['elem_radii'].values[0] + tpl.loc[tpl['elem_num']==dmat.index[j]]['elem_radii'].values[0]
+				for num_i in range(len(ref_range)):
+					if num_i < len(ref_range)-1:
+						if ref > ref_range[num_i] and ref <= ref_range[num_i+1]:
+							offsetfact = bnl_offset_fact[num_i]
+							offset = ref*offsetfact
+							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+								connect[i].append(j)
+								conAtm[i].append(mapAtmType[j])
+								conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+					else:
+						if ref > ref_range[num_i]:
+							offsetfact = bnl_offset_fact[num_i]
+							offset = ref*offsetfact
+							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+								connect[i].append(j)
+								conAtm[i].append(mapAtmType[j])
+								conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+							
+							#Nbond+=1
+			#	# criterion for C-C single bond
+			#	if dmat.index[i] ==6 and dmat.index[j] == 6:
+			#			if dmat.iloc[i][j] < 1.55:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#	# criterion for N-N single bond
+			#	elif dmat.index[i] ==7 and dmat.index[j] == 7:
+			#			if dmat.iloc[i][j] < 1.36:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for S-S single bond
+			#	elif dmat.index[i] == 16 and dmat.index[j] == 16:
+			#			if dmat.iloc[i][j] < 2.08:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-O or O-C single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 8) or (dmat.index[i] ==8 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.44:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-N or N-C single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.48:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for X-H, where X is not H
+			#	elif (dmat.index[i] !=1 and dmat.index[j] == 1) or (dmat.index[i] ==1 and dmat.index[j] != 1) :
+			#			if dmat.iloc[i][j] < 1.36:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for O-N or N-O single bond
+			#	elif (dmat.index[i] ==8 and dmat.index[j] == 7) or (dmat.index[i] ==7 and dmat.index[j] == 8) :
+			#			if dmat.iloc[i][j] < 1.25:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for O-P or P-O single bond
+			#	elif (dmat.index[i] ==8 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 8) :
+			#			if dmat.iloc[i][j] < 1.64:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-Br single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 35) or (dmat.index[i] ==35 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.95:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-F single bond
+			#	#              the bond length increased from 1.38 to 1.39
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 9) or (dmat.index[i] ==9 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.39:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-Cl single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 17) or (dmat.index[i] ==17 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.77:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-I single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 53) or (dmat.index[i] ==53 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 2.15:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-P single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 15) or (dmat.index[i] ==15 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.85:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# criterion for C-S single bond
+			#	elif (dmat.index[i] ==6 and dmat.index[j] == 16) or (dmat.index[i] ==16 and dmat.index[j] == 6) :
+			#			if dmat.iloc[i][j] < 1.83:
+			#				connect[i].append(j)
+			#				conAtm[i].append(mapAtmType[j])
+			#				conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#				#conIdx[i].append(mapAtmIdx[j])
+			#	# for missing cases!
+			#	else:
+			#		if dmat.iloc[i][j] < bcut:
+			#			connect[i].append(j)
+			#			conAtm[i].append(mapAtmType[j])
+			#			conIdx[i].append(mapAtmIdx[mapAtmType[j]])
+			#			#conIdx[i].append(mapAtmIdx[j])
 	return connect,conAtm,conIdx
 
 def getEQU(connect,xyz,depth=2):
@@ -619,16 +673,16 @@ if __name__ == '__main__':
 	#filename = '../C5NH5_b3lyp_321g_esp.dat'
 	#filename = '../PO3CH5_b3lyp_321g_esp.dat'
 	#filename = '../C4H10_b3lyp_321g_esp.dat'
-	#filename = '../CH3S2CH3_b3lyp_321g_esp.dat'
+	filename = 'example/CH3S2CH3_b3lyp_321g_esp.dat'
 	#filename = 'example/C6H6_b3lyp_321g_esp.dat'
-	#filename = 'esp.dat'
-	filename = 'example/CH3F_ccsd_a4z_esp.dat'
+	#filename = 'example/esp.dat'
+	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
 	xyz = getXYZ(filename)
 	#print(xyz[['x','y','z']])
 	dMat = distMatrix(xyz)
 	print(dMat)
-	#Nbond = getBOND(xyz)
-	#print(Nbond)
+	Nbond = getBOND(xyz)
+	print('Num. of bonds is: {}'.format(Nbond))
 	conn,conAtm,conIdx = getCONN(xyz)
 	#conn,conAtm = getCONN(xyz)
 	print(conn)
@@ -648,4 +702,4 @@ if __name__ == '__main__':
 	print(in2_idx_dipole)
 	#print(equAtmMap.shape[0],equAtmMap.shape[1])
 	TBL = readconnectTBL('./CONNECT.TPL')
-	print(TBL)
+	print(TBL.loc[TBL['elem_num']==8]['elem_radii'].values[0])
