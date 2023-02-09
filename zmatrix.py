@@ -7,6 +7,8 @@ from scipy.spatial import distance_matrix
 from constant import *
 from collections import Counter
 from constant_radii import tbl
+#import sys
+#sys.setrecursionlimit(99999)
 
 def flatten_list(_2d_list):
 	flat_list = []
@@ -433,6 +435,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 	for i in range(equAtm.shape[0]):
 		for j in range(equAtm.shape[1]):
 			if i < j and equAtm.values[i][j] == 1.0:
+			#if equAtm.values[i][j] == 1.0: # enumerate all
 				# 1st stage: find equivalent heavy atoms including the carbon in -CH3 and -CH2-
 				if xyz['ida'][i] !=1:
 					if j not in flatten_list(symidx_hvy):
@@ -565,6 +568,7 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			for x in v:
 				bond_info[bond_idx] = [k,x]
 				bond_idx +=1
+		#print('## bond_info')
 		#print(bond_info)
 
 		# find bond equivalent info. with the help of symidx_hvy, symidx_ch2, symidx_ch3, and symidx_hxx
@@ -574,26 +578,42 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			for k2,v2 in bond_info.items():
 				if k1 <k2:
 					# find bond equivalent for fragment such as -ch2-, -ch3, -nh2, and -nh3+
-					if (v1[0] in flatten_list(symidx_hvy) and v2[0] in flatten_list(symidx_hvy) and v1[1] == v2[1]) or \
-						(v1[1] in flatten_list(symidx_hvy) and v2[1] in flatten_list(symidx_hvy) and v1[0] == v2[0]) or \
-						(v1[0] in flatten_list(symidx_ch2) and v2[0] in flatten_list(symidx_ch2) and v1[1] == v2[1]) or \
-						(v1[1] in flatten_list(symidx_ch2) and v2[1] in flatten_list(symidx_ch2) and v1[0] == v2[0]) or \
-						(v1[0] in flatten_list(symidx_ch3) and v2[0] in flatten_list(symidx_ch3) and v1[1] == v2[1]) or \
-						(v1[1] in flatten_list(symidx_ch3) and v2[1] in flatten_list(symidx_ch3) and v1[0] == v2[0]) or \
-						(v1[0] in flatten_list(symidx_hxx) and v2[0] in flatten_list(symidx_hxx) and v1[1] == v2[1]) or \
-						(v1[1] in flatten_list(symidx_hxx) and v2[1] in flatten_list(symidx_hxx) and v1[0] == v2[0]):
-						bond_equl.append([k1,k2])
+					if pair_cmp_list(v1,v2,symidx_hvy,symidx_hvy) or \
+						pair_cmp_list(v1,v2,symidx_ch2,symidx_ch2) or \
+						pair_cmp_list(v1,v2,symidx_ch3,symidx_ch3) or \
+						pair_cmp_list(v1,v2,symidx_hxx,symidx_hxx) or \
+						pair_cmp_list(v1,v2,symidx_hvy,symidx_ch2) or \
+						pair_cmp_list(v1,v2,symidx_hvy,symidx_ch3) or \
+						pair_cmp_list(v1,v2,symidx_hvy,symidx_hxx) or \
+						pair_cmp_list(v1,v2,symidx_hxx,symidx_hvy) or \
+						pair_cmp_list(v1,v2,symidx_hxx,symidx_ch2) or \
+						pair_cmp_list(v1,v2,symidx_hxx,symidx_ch3) or \
+						pair_cmp_list(v1,v2,symidx_ch2,symidx_hvy) or \
+						pair_cmp_list(v1,v2,symidx_ch2,symidx_ch3) or \
+						pair_cmp_list(v1,v2,symidx_ch2,symidx_hxx) or \
+						pair_cmp_list(v1,v2,symidx_ch3,symidx_hvy) or \
+						pair_cmp_list(v1,v2,symidx_ch3,symidx_ch2) or \
+						pair_cmp_list(v1,v2,symidx_ch3,symidx_hxx):
+##					if (v1[0] in flatten_list(symidx_hvy) and v2[0] in flatten_list(symidx_hvy) and v1[1] == v2[1]) or \
+##						(v1[1] in flatten_list(symidx_hvy) and v2[1] in flatten_list(symidx_hvy) and v1[0] == v2[0]) or\
+##						(v1[0] in flatten_list(symidx_ch2) and v2[0] in flatten_list(symidx_ch2) and v1[1] == v2[1]) or\
+##						(v1[1] in flatten_list(symidx_ch2) and v2[1] in flatten_list(symidx_ch2) and v1[0] == v2[0]) or\
+##						(v1[0] in flatten_list(symidx_ch3) and v2[0] in flatten_list(symidx_ch3) and v1[1] == v2[1]) or\
+##						(v1[1] in flatten_list(symidx_ch3) and v2[1] in flatten_list(symidx_ch3) and v1[0] == v2[0]) or\
+##						(v1[0] in flatten_list(symidx_hxx) and v2[0] in flatten_list(symidx_hxx) and v1[1] == v2[1]) or\
+##						(v1[1] in flatten_list(symidx_hxx) and v2[1] in flatten_list(symidx_hxx) and v1[0] == v2[0]):
+##						bond_equl.append([k1,k2])
 
 
 					# find bond equivalent for -c_ah2,-c_bh2,  where c_a and c_b and h are equivalent
-					elif ((v1[0] in flatten_list(symidx_hvy) and v2[0] in flatten_list(symidx_hvy)) \
-						or (v1[0] in flatten_list(symidx_ch2) and v2[0] in flatten_list(symidx_ch2)) \
-						or (v1[0] in flatten_list(symidx_ch3) and v2[0] in flatten_list(symidx_ch3)) \
-						or (v1[0] in flatten_list(symidx_hxx) and v2[0] in flatten_list(symidx_hxx))) \
-						and ((v1[1] in flatten_list(symidx_hvy) and v2[1] in flatten_list(symidx_hvy)) \
-						or (v1[1] in flatten_list(symidx_ch2) and v2[1] in flatten_list(symidx_ch2)) \
-						or (v1[1] in flatten_list(symidx_ch3) and v2[1] in flatten_list(symidx_ch3)) \
-						or (v1[1] in flatten_list(symidx_hxx) and v2[1] in flatten_list(symidx_hxx))):
+##					if ((v1[0] in flatten_list(symidx_hvy) and v2[0] in flatten_list(symidx_hvy)) \
+##						or (v1[0] in flatten_list(symidx_ch2) and v2[0] in flatten_list(symidx_ch2)) \
+##						or (v1[0] in flatten_list(symidx_ch3) and v2[0] in flatten_list(symidx_ch3)) \
+##						or (v1[0] in flatten_list(symidx_hxx) and v2[0] in flatten_list(symidx_hxx))) \
+##						and ((v1[1] in flatten_list(symidx_hvy) and v2[1] in flatten_list(symidx_hvy)) \
+##						or (v1[1] in flatten_list(symidx_ch2) and v2[1] in flatten_list(symidx_ch2)) \
+##						or (v1[1] in flatten_list(symidx_ch3) and v2[1] in flatten_list(symidx_ch3)) \
+##						or (v1[1] in flatten_list(symidx_hxx) and v2[1] in flatten_list(symidx_hxx))):
 
 				#	if ((v1[0] in flatten_list(symidx_hvy) or v2[0] in flatten_list(symidx_hvy)) \
 				#		and (v1[0] in flatten_list(symidx_hvy) or v2[0] in flatten_list(symidx_hvy))) \
@@ -607,7 +627,7 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 						#if k1 not in flatten_list(bond_equl) and k2 not in flatten_list(bond_equl):
 						bond_equl.append([k1,k2])
 					#elif 
-	
+		#print('## bond_equl')
 		#print(bond_equl)
 		b_sym = {}
 		for b_eq in bond_equl:
@@ -642,6 +662,93 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 	else:
 		print('WRONG P-TYPE WAS SPECIFIED')
 		
+#def pair_cmp_list(v1,v2,symidx_a, symidx_b):
+#	if v1[0] != v2[0]:
+#		for a_list in symidx_a:
+#			if (v1[0] in a_list and v2[0] in a_list):
+#				for b_list in symidx_b:
+#					if (v1[1] in b_list and v2[1] in b_list) or (v1[1] == v2[1]):
+#						return True
+#	else:
+#		for b_list in symidx_b:
+#			if (v1[1] in b_list and v2[1] in b_list) or (v1[1] == v2[1]):
+#				return True
+#	return False
+
+def pair_cmp_list(v1,v2,symidx_a, symidx_b):
+	if v1[0] != v2[0]:
+		if len(symidx_a) !=0:
+			#for a_list in merge_lst(symidx_a):
+			for a_list in merge_list(symidx_a):
+				if (v1[0] in a_list and v2[0] in a_list):
+					if v1[1] == v2[1]:
+						return True
+					else:
+						if len(symidx_b) !=0:
+							#for b_list in merge_lst(symidx_b):
+							for b_list in merge_list(symidx_b):
+								if (v1[1] in b_list and v2[1] in b_list):
+									return True
+	else:
+		if len(symidx_b) !=0:
+			#for b_list in merge_lst(symidx_b):
+			for b_list in merge_list(symidx_b):
+				if (v1[1] in b_list and v2[1] in b_list):
+					return True
+		
+	return False
+			
+def found_idx(lst,k):
+	'''
+	lst: [[1,2,3],[2,1],[3,4],[5],[6,7]]
+	k = 3
+	return: [0,2], [1,2,3,4]
+	'''
+	idx = []
+	for i, js in enumerate(lst):
+		for j in js:
+			if j == k:
+				idx.append(i)
+				continue
+	mg_lst = []
+	for x in idx:
+		mg_lst += lst[x]
+	return idx, list(set(mg_lst))
+
+def merge_lst(lst):
+	'''
+	lst: [[1,2,3],[2,1],[3,4],[5],[6,7]]
+	return: [[1,2,3,4],[5],[6,7]]
+	'''
+	outlst = []
+	for i,js in enumerate(lst):
+		for j in js:
+			idx, mg_lst = found_idx(lst,j)
+			if mg_lst not in outlst:
+				outlst.append(list(mg_lst))
+	if outlst == lst:
+		return outlst
+	else:
+		return merge_lst(outlst)
+
+
+def merge_list(L):
+	# convert list to set for utilizing API union
+	L = [set(i) for i in L]
+	lenth = len(L)
+	for i in range(1,lenth):
+		for j in range(i):
+			if L[i] == {0} or L[j] == {0}:
+				continue
+			x = L[i].union(L[j])
+			y = len(L[i]) + len(L[j])
+			if len(x) < y:
+				L[i] = x
+				L[j] = {0}
+
+	return [list(i) for i in L if i != {0}]
+
+
 
 def dipole_idx_reshape(in1_idx_dipole,conn):
 	output = {}
@@ -655,7 +762,7 @@ def dipole_idx_reshape(in1_idx_dipole,conn):
 
 	return output
 
-def dumpXYZ(filename,data):
+def dumpXYZ(filename,data,unit='angstrom'):
 	'''
 		dump the xyz coordinate of ESP data to xyz file format for visualization.
 		- input: 
@@ -667,7 +774,10 @@ def dumpXYZ(filename,data):
 		f.write("{:10d}\n".format(len(data['ida'].values)))
 		f.write('\n')
 		for i in range(len(data['ida'].values)):
-			f.write("{:4d} {:10.4f} {:10.4f} {:10.4f}\n".format(data['ida'][i],data['x'][i]/ang2bohr,data['y'][i]/ang2bohr,data['z'][i]/ang2bohr))
+			if unit == 'au':
+				f.write("{:4d} {:10.4f} {:10.4f} {:10.4f}\n".format(data['ida'][i],data['x'][i]/ang2bohr,data['y'][i]/ang2bohr,data['z'][i]/ang2bohr))
+			elif unit == 'angstrom':
+				f.write("{:4d} {:10.4f} {:10.4f} {:10.4f}\n".format(data['ida'][i],data['x'][i],data['y'][i],data['z'][i]))
 
 
 
@@ -677,20 +787,29 @@ if __name__ == '__main__':
 	#filename = '../C5NH5_b3lyp_321g_esp.dat'
 	#filename = '../PO3CH5_b3lyp_321g_esp.dat'
 	#filename = '../C4H10_b3lyp_321g_esp.dat'
-	filename = 'example/CH3S2CH3_b3lyp_321g_esp.dat'
-	#filename = 'example/C6H6_b3lyp_321g_esp.dat'
+	#filename = 'example/CH3S2CH3_b3lyp_321g_esp.dat'
+	#filename = 'example/CH3SO2CH3_mp2_a4z_esp.dat'
+	filename = 'example/C6H6_b3lyp_321g_esp.dat'
 	#filename = 'example/esp.dat'
 	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
+	#filename = 'example/bis_esp.dat'
+	#filename = '../../test/CH2O_ccsd_a4z_esp.dat'
 	xyz = getXYZ(filename)
-	#print(xyz[['x','y','z']])
+	print(xyz[['x','y','z']])
 	dMat = distMatrix(xyz)
+	print('# DMatrix')
 	print(dMat)
+	print(dMat.columns)
+	print(dMat.index)
 	Nbond = getBOND(xyz)
 	print('Num. of bonds is: {}'.format(Nbond))
 	conn,conAtm,conIdx = getCONN(xyz)
 	#conn,conAtm = getCONN(xyz)
+	print('#Variable $conn$ content:')
 	print(conn)
+	print('#Variable $conAtm$ content:')
 	print(conAtm)
+	print('#Variable $conIdx$ content:')
 	print(conIdx)
 	equAtmMap = getEQU(conn,xyz,depth=3)
 	idx_ch2,idx_ch3 = getCH2CH3(conIdx,xyz)
@@ -705,5 +824,4 @@ if __name__ == '__main__':
 	print(in1_idx_dipole)
 	print(in2_idx_dipole)
 	#print(equAtmMap.shape[0],equAtmMap.shape[1])
-	TBL = readconnectTBL('./CONNECT.TPL')
-	print(TBL.loc[TBL['elem_num']==8]['elem_radii'].values[0])
+	dumpXYZ('test.xyz',xyz,unit='angstrom')
