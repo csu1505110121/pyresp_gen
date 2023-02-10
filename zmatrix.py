@@ -435,6 +435,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 	for i in range(equAtm.shape[0]):
 		for j in range(equAtm.shape[1]):
 			if i < j and equAtm.values[i][j] == 1.0:
+				#print('{} | {} | {}'.format(i,j,equAtm.values[i][j]))
 			#if equAtm.values[i][j] == 1.0: # enumerate all
 				# 1st stage: find equivalent heavy atoms including the carbon in -CH3 and -CH2-
 				if xyz['ida'][i] !=1:
@@ -447,6 +448,9 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich2]:
 								if j not in flatten_list(symidx_ch2):
 									symidx_ch2.append([i,j])
+							elif i not in conn[ich2]:
+								if j not in flatten_list(symidx_hxx):
+									symidx_hxx.append([i,j])
 							#else:
 							#	if j not in flatten_list(symidx_hxx):
 							#		symidx_hxx.append([i,j])
@@ -454,6 +458,9 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich3]:
 								if j not in flatten_list(symidx_ch3):
 									symidx_ch3.append([i,j])
+							elif i not in conn[ich3]:
+								if j not in flatten_list(symidx_hxx):
+									symidx_hxx.append([i,j])
 							#else:
 							#	if j not in flatten_list(symidx_hxx):
 							#		symidx_hxx.append([i,j])
@@ -462,6 +469,9 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich3]:
 								if j not in flatten_list(symidx_ch3):
 									symidx_ch3.append([i,j])
+							elif i not in conn[ich3]:
+								if j not in flatten_list(symidx_hxx):
+									symidx_hxx.append([i,j])
 							#else:
 							#	if j not in flatten_list(symidx_hxx):
 							#		symidx_hxx.append([i,j])
@@ -470,12 +480,15 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich2]:
 								if j not in flatten_list(symidx_ch2):
 									symidx_ch2.append([i,j])
+							elif i not in conn[ich2]:
+								if j not in flatten_list(symidx_hxx):
+									symidx_hxx.append([i,j])
 							#else:
 							#	if j not in flatten_list(symidx_hxx):
 							#		symidx_hxx.append([i,j])
-					else:
-						if j not in flatten_list(symidx_hxx):
-							symidx_hxx.append([i,j])
+					#else:
+					#	if j not in flatten_list(symidx_hxx):
+					#		symidx_hxx.append([i,j])
 	return symidx_hvy,symidx_ch2,symidx_ch3,symidx_hxx
 
 def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='chg'):
@@ -789,7 +802,9 @@ if __name__ == '__main__':
 	#filename = '../C4H10_b3lyp_321g_esp.dat'
 	#filename = 'example/CH3S2CH3_b3lyp_321g_esp.dat'
 	#filename = 'example/CH3SO2CH3_mp2_a4z_esp.dat'
-	filename = 'example/C6H6_b3lyp_321g_esp.dat'
+	#filename = 'example/C6H6_b3lyp_321g_esp.dat'
+	filename = 'example/CH3NH2_mp2_a4z_esp.dat'
+	#filename = 'example/qiang_test_case_esp_b321.dat'
 	#filename = 'example/esp.dat'
 	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
 	#filename = 'example/bis_esp.dat'
