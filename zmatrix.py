@@ -451,7 +451,8 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich2]:
 								if j not in flatten_list(symidx_ch2):
 									symidx_ch2.append([i,j])
-							elif i not in flatten_list([conn[ich2_tmp] for ich2_tmp in idx_ch2]):
+							elif i not in flatten_list([conn[ich2_tmp] for ich2_tmp in idx_ch2+idx_ch3]):
+								#print(i,flatten_list([conn[ich2_tmp] for ich2_tmp in idx_ch2+idx_ch3]))
 								# make sure i not in -CH2- connect list
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
@@ -462,7 +463,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich3]:
 								if j not in flatten_list(symidx_ch3):
 									symidx_ch3.append([i,j])
-							elif i not in flatten_list([conn[ich3_tmp] for ich3_tmp in idx_ch3]):
+							elif i not in flatten_list([conn[ich3_tmp] for ich3_tmp in idx_ch3+idx_ch2]):
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
 							#else:
@@ -546,10 +547,12 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 		for hvy in symidx_hvy:
 			in1_idx[hvy[1]] = hvy[0]+1
 	
-		## set the equivalent index in the 2nd file,  remain the label to be -1 to be fixed
-		##			for heavy atoms
-		#for hvy in symidx_hvy:
-		#	in2_idx[hvy[1]] = hvy[0]+1
+		# set the equivalent index in the 2nd file,  remain the label to be -1 to be fixed
+		#			for heavy atoms
+		for hvy in symidx_hvy:
+			#print('TEST',hvy, symidx_hvy)
+			if hvy[0] in idx_ch2 or hvy[0] in idx_ch3:
+				in2_idx[hvy[1]] = hvy[0]+1
 		return in1_idx,in2_idx, in1_idx_dipole, in2_idx_dipole
 
 	elif ptype=='perm' or ptype=='perm-v':
@@ -598,9 +601,9 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			in1_idx[hvy[1]] = hvy[0]+1
 		# set the equivalent index in the 2nd file
 		#			for heavy atoms
-
-		#for hvy in symidx_hvy:
-		#	in2_idx[hvy[1]] = hvy[0]+1
+		for hvy in symidx_hvy:
+			if hvy[0] in idx_ch2 or hvy[0] in idx_ch3:
+				in2_idx[hvy[1]] = hvy[0]+1
 		
 		# construct bond info, the info. is arranged in the following order:
 		#     bond index,    center atom idx.,   bonded atom idx
@@ -825,7 +828,7 @@ def dumpXYZ(filename,data,unit='angstrom'):
 
 
 if __name__ == '__main__':
-	filename = 'example/C2H6_b3lyp_321g_esp.dat'
+	#filename = 'example/C2H6_b3lyp_321g_esp.dat'
 	#filename = '../C5NH5_b3lyp_321g_esp.dat'
 	#filename = '../PO3CH5_b3lyp_321g_esp.dat'
 	#filename = '../C4H10_b3lyp_321g_esp.dat'
@@ -839,6 +842,7 @@ if __name__ == '__main__':
 	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
 	#filename = 'example/bis_esp.dat'
 	#filename = '../../test/CH2O_ccsd_a4z_esp.dat'
+	filename = 'example/C3H8_mp2_a4z_esp.dat'
 	xyz = getXYZ(filename)
 	print(xyz[['x','y','z']])
 	dMat = distMatrix(xyz)
@@ -862,6 +866,7 @@ if __name__ == '__main__':
 	print(idx_ch2, idx_ch3)
 	print(type(equAtmMap.values))
 	sym_hvy, sym_ch2, sym_ch3, sym_hxx = getSymIdx(equAtmMap, xyz, idx_ch2, idx_ch3,conn)
+	print('HVY atom \t H(-CH2-) \t H(-CH3) \t Other H')
 	print(sym_hvy,sym_ch2,sym_ch3, sym_hxx )
 	in1_idx,in2_idx,in1_idx_dipole, in2_idx_dipole = dumpSymIdx(sym_hvy, sym_ch2, sym_ch3, sym_hxx,idx_ch2, idx_ch3,xyz,conn,ptype='perm')
 	print(in1_idx)
