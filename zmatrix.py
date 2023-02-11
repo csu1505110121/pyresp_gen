@@ -486,9 +486,9 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							#else:
 							#	if j not in flatten_list(symidx_hxx):
 							#		symidx_hxx.append([i,j])
-					#else:
-					#	if j not in flatten_list(symidx_hxx):
-					#		symidx_hxx.append([i,j])
+					else:
+						if j not in flatten_list(symidx_hxx):
+							symidx_hxx.append([i,j])
 	return symidx_hvy,symidx_ch2,symidx_ch3,symidx_hxx
 
 def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='chg'):
@@ -501,6 +501,17 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 		#		for heavy atoms
 		for hvy in symidx_hvy:
 			in1_idx[hvy[1]] = hvy[0]+1
+		# define the equivalent index in the 1st file 
+		#		for hydrogen atoms not involved in -CH2- or -CH3
+		for h in symidx_hxx:
+			in1_idx[h[0]] = 0
+			in1_idx[h[1]] = h[0]+1
+			# treating the whole function group to change together
+			#	such as the NH2, which not only put the equivalent label to H
+			#	but also let charge of atom N to chage freely.
+			for k,v in conn.items():
+				if h[0] in v and h[1] in v: # if two hydrogen are in the connected, we guess the center atom is also in the function group
+					in1_idx[k] =0
 		# define the equivalent index in the 2nd file 
 		#		for only hydrogen atoms
 		for h in symidx_hxx:
@@ -540,6 +551,17 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 		#		for heavy atoms
 		for hvy in symidx_hvy:
 			in1_idx[hvy[1]] = hvy[0]+1
+		# define the equivalent index in the 1st file 
+		#		for hydrogen atoms not involved in -CH2- -CH3
+		for h in symidx_hxx:
+			in1_idx[h[0]] = 0
+			in1_idx[h[1]] = h[0]+1
+			# treating the whole function group to change together
+			#	such as the NH2, which not only put the equivalent label to H
+			#	but also let charge of atom N to chage freely.
+			for k,v in conn.items():
+				if h[0] in v and h[1] in v:
+					in1_idx[k] =0
 		# define the equivalent index in the 2nd file 
 		#		for only hydrogen atoms
 		for h in symidx_hxx:
@@ -803,7 +825,8 @@ if __name__ == '__main__':
 	#filename = 'example/CH3S2CH3_b3lyp_321g_esp.dat'
 	#filename = 'example/CH3SO2CH3_mp2_a4z_esp.dat'
 	#filename = 'example/C6H6_b3lyp_321g_esp.dat'
-	filename = 'example/CH3NH2_mp2_a4z_esp.dat'
+	#filename = 'example/CH3NH2_mp2_a4z_esp.dat'
+	filename = 'example/CHNHOH_mp2_a4z_esp.dat'
 	#filename = 'example/qiang_test_case_esp_b321.dat'
 	#filename = 'example/esp.dat'
 	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
