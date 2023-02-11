@@ -408,6 +408,9 @@ def getCH2CH3(conIdx,xyz):
 			idx_ch3.append(key)
 		elif len(values) ==4 and Counter(values)[1]==2 and xyz['ida'][key]==6:
 			idx_ch2.append(key)
+		elif len(values) ==4 and Counter(values)[1]==4 and xyz['ida'][key]==6:
+			# condition for CH4
+			idx_ch3.append(key)
 
 	return idx_ch2,idx_ch3
 
@@ -497,10 +500,6 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 	in1_idx_dipole = [0 for k,v in conn.items() for x in v]
 	in2_idx_dipole = [-1 for k,v in conn.items() for x in v]
 	if ptype=='chg' or ptype=='ind':
-		# define the equivalent index in the 1st file
-		#		for heavy atoms
-		for hvy in symidx_hvy:
-			in1_idx[hvy[1]] = hvy[0]+1
 		# define the equivalent index in the 1st file 
 		#		for hydrogen atoms not involved in -CH2- or -CH3
 		for h in symidx_hxx:
@@ -512,17 +511,17 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			for k,v in conn.items():
 				if h[0] in v and h[1] in v: # if two hydrogen are in the connected, we guess the center atom is also in the function group
 					in1_idx[k] =0
-		# define the equivalent index in the 2nd file 
-		#		for only hydrogen atoms
-		for h in symidx_hxx:
-			in2_idx[h[0]] = 0
-			in2_idx[h[1]] = h[0]+1
-			# treating the whole function group to change together
-			#	such as the NH2, which not only put the equivalent label to H
-			#	but also let charge of atom N to chage freely.
-			for k,v in conn.items():
-				if h[0] in v and h[1] in v: # if two hydrogen are in the connected, we guess the center atom is also in the function group
-					in2_idx[k] =0
+		## define the equivalent index in the 2nd file ; remain the label to be -1 to be fixed
+		##		for only hydrogen atoms
+		#for h in symidx_hxx:
+		#	in2_idx[h[0]] = 0
+		#	in2_idx[h[1]] = h[0]+1
+		#	# treating the whole function group to change together
+		#	#	such as the NH2, which not only put the equivalent label to H
+		#	#	but also let charge of atom N to chage freely.
+		#	for k,v in conn.items():
+		#		if h[0] in v and h[1] in v: # if two hydrogen are in the connected, we guess the center atom is also in the function group
+		#			in2_idx[k] =0
 		if len(idx_ch2) !=0:
 			# let charge of atom C to change freely
 			for c_ch2 in idx_ch2:
@@ -539,18 +538,19 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			for h_ch3 in symidx_ch3:
 				in2_idx[h_ch3[0]] = 0
 				in2_idx[h_ch3[1]] = h_ch3[0]+1
-	
-		# set the equivalent index in the 2nd file
-		#			for heavy atoms
-		for hvy in symidx_hvy:
-			in2_idx[hvy[1]] = hvy[0]+1
-		return in1_idx,in2_idx, in1_idx_dipole, in2_idx_dipole
 
-	elif ptype=='perm' or ptype=='perm-v':
 		# define the equivalent index in the 1st file
 		#		for heavy atoms
 		for hvy in symidx_hvy:
 			in1_idx[hvy[1]] = hvy[0]+1
+	
+		## set the equivalent index in the 2nd file,  remain the label to be -1 to be fixed
+		##			for heavy atoms
+		#for hvy in symidx_hvy:
+		#	in2_idx[hvy[1]] = hvy[0]+1
+		return in1_idx,in2_idx, in1_idx_dipole, in2_idx_dipole
+
+	elif ptype=='perm' or ptype=='perm-v':
 		# define the equivalent index in the 1st file 
 		#		for hydrogen atoms not involved in -CH2- -CH3
 		for h in symidx_hxx:
@@ -590,8 +590,13 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 				in2_idx[h_ch3[0]] = 0
 				in2_idx[h_ch3[1]] = h_ch3[0]+1
 	
+		# define the equivalent index in the 1st file
+		#		for heavy atoms
+		for hvy in symidx_hvy:
+			in1_idx[hvy[1]] = hvy[0]+1
 		# set the equivalent index in the 2nd file
 		#			for heavy atoms
+
 		for hvy in symidx_hvy:
 			in2_idx[hvy[1]] = hvy[0]+1
 		
