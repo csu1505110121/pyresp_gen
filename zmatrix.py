@@ -562,17 +562,17 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 			for k,v in conn.items():
 				if h[0] in v and h[1] in v:
 					in1_idx[k] =0
-		# define the equivalent index in the 2nd file 
-		#		for only hydrogen atoms
-		for h in symidx_hxx:
-			in2_idx[h[0]] = 0
-			in2_idx[h[1]] = h[0]+1
-			# treating the whole function group to change together
-			#	such as the NH2, which not only put the equivalent label to H
-			#	but also let charge of atom N to chage freely.
-			for k,v in conn.items():
-				if h[0] in v and h[1] in v:
-					in2_idx[k] =0
+		## define the equivalent index in the 2nd file ; remain the label to be -1 to be fixed
+		##		for only hydrogen atoms
+		#for h in symidx_hxx:
+		#	in2_idx[h[0]] = 0
+		#	in2_idx[h[1]] = h[0]+1
+		#	# treating the whole function group to change together
+		#	#	such as the NH2, which not only put the equivalent label to H
+		#	#	but also let charge of atom N to chage freely.
+		#	for k,v in conn.items():
+		#		if h[0] in v and h[1] in v:
+		#			in2_idx[k] =0
 		if len(idx_ch2) !=0:
 			# let charge of atom C to change freely
 			for c_ch2 in idx_ch2:
@@ -597,8 +597,8 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 		# set the equivalent index in the 2nd file
 		#			for heavy atoms
 
-		for hvy in symidx_hvy:
-			in2_idx[hvy[1]] = hvy[0]+1
+		#for hvy in symidx_hvy:
+		#	in2_idx[hvy[1]] = hvy[0]+1
 		
 		# construct bond info, the info. is arranged in the following order:
 		#     bond index,    center atom idx.,   bonded atom idx
