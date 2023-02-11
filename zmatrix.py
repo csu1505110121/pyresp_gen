@@ -451,7 +451,8 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich2]:
 								if j not in flatten_list(symidx_ch2):
 									symidx_ch2.append([i,j])
-							elif i not in conn[ich2]:
+							elif i not in flatten_list([conn[ich2_tmp] for ich2_tmp in idx_ch2]):
+								# make sure i not in -CH2- connect list
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
 							#else:
@@ -461,7 +462,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich3]:
 								if j not in flatten_list(symidx_ch3):
 									symidx_ch3.append([i,j])
-							elif i not in conn[ich3]:
+							elif i not in flatten_list([conn[ich3_tmp] for ich3_tmp in idx_ch3]):
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
 							#else:
@@ -472,7 +473,8 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich3]:
 								if j not in flatten_list(symidx_ch3):
 									symidx_ch3.append([i,j])
-							elif i not in conn[ich3]:
+							elif i not in flatten_list([conn[ich3_tmp] for ich3_tmp in idx_ch3]):
+								#print(i,conn[ich3])
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
 							#else:
@@ -483,7 +485,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							if i in conn[ich2]:
 								if j not in flatten_list(symidx_ch2):
 									symidx_ch2.append([i,j])
-							elif i not in conn[ich2]:
+							elif i not in flatten_list([conn[ich2_tmp] for ich2_tmp in idx_ch2]):
 								if j not in flatten_list(symidx_hxx):
 									symidx_hxx.append([i,j])
 							#else:
@@ -823,7 +825,7 @@ def dumpXYZ(filename,data,unit='angstrom'):
 
 
 if __name__ == '__main__':
-	#filename = 'example/C2H6_b3lyp_321g_esp.dat'
+	filename = 'example/C2H6_b3lyp_321g_esp.dat'
 	#filename = '../C5NH5_b3lyp_321g_esp.dat'
 	#filename = '../PO3CH5_b3lyp_321g_esp.dat'
 	#filename = '../C4H10_b3lyp_321g_esp.dat'
@@ -831,7 +833,7 @@ if __name__ == '__main__':
 	#filename = 'example/CH3SO2CH3_mp2_a4z_esp.dat'
 	#filename = 'example/C6H6_b3lyp_321g_esp.dat'
 	#filename = 'example/CH3NH2_mp2_a4z_esp.dat'
-	filename = 'example/CHNHOH_mp2_a4z_esp.dat'
+	#filename = 'example/CHNHOH_mp2_a4z_esp.dat'
 	#filename = 'example/qiang_test_case_esp_b321.dat'
 	#filename = 'example/esp.dat'
 	#filename = 'example/CH3F_ccsd_a4z_esp.dat'
