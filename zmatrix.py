@@ -618,27 +618,19 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 
 		# find bond equivalent info. with the help of symidx_hvy, symidx_ch2, symidx_ch3, and symidx_hxx
 		#   the assumption is that, if any two is equivalent, then bond formed between them should be equivalent
-		bond_equl = []
+		bond_equl_ch2 = []
+		bond_equl_h2c = []
+		bond_equl_ch3 = []
+		bond_equl_h3c = []
+		bond_equl_oth = []
 		for k1,v1 in bond_info.items():
 			for k2,v2 in bond_info.items():
 				if k1 <k2:
 					# find bond equivalent for fragment such as -ch2-, -ch3, -nh2, and -nh3+
 					if pair_cmp_list(v1,v2,symidx_hvy,symidx_hvy) or \
-						pair_cmp_list(v1,v2,symidx_ch2,symidx_ch2) or \
-						pair_cmp_list(v1,v2,symidx_ch3,symidx_ch3) or \
 						pair_cmp_list(v1,v2,symidx_hxx,symidx_hxx) or \
-						pair_cmp_list(v1,v2,symidx_hvy,symidx_ch2) or \
-						pair_cmp_list(v1,v2,symidx_hvy,symidx_ch3) or \
 						pair_cmp_list(v1,v2,symidx_hvy,symidx_hxx) or \
-						pair_cmp_list(v1,v2,symidx_hxx,symidx_hvy) or \
-						pair_cmp_list(v1,v2,symidx_hxx,symidx_ch2) or \
-						pair_cmp_list(v1,v2,symidx_hxx,symidx_ch3) or \
-						pair_cmp_list(v1,v2,symidx_ch2,symidx_hvy) or \
-						pair_cmp_list(v1,v2,symidx_ch2,symidx_ch3) or \
-						pair_cmp_list(v1,v2,symidx_ch2,symidx_hxx) or \
-						pair_cmp_list(v1,v2,symidx_ch3,symidx_hvy) or \
-						pair_cmp_list(v1,v2,symidx_ch3,symidx_ch2) or \
-						pair_cmp_list(v1,v2,symidx_ch3,symidx_hxx):
+						pair_cmp_list(v1,v2,symidx_hxx,symidx_hvy):
 ##					if (v1[0] in flatten_list(symidx_hvy) and v2[0] in flatten_list(symidx_hvy) and v1[1] == v2[1]) or \
 ##						(v1[1] in flatten_list(symidx_hvy) and v2[1] in flatten_list(symidx_hvy) and v1[0] == v2[0]) or\
 ##						(v1[0] in flatten_list(symidx_ch2) and v2[0] in flatten_list(symidx_ch2) and v1[1] == v2[1]) or\
@@ -670,31 +662,107 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 				#		and (v1[0] in flatten_list(symidx_hxx) or v2[0] in flatten_list(symidx_hxx))):
 						
 						#if k1 not in flatten_list(bond_equl) and k2 not in flatten_list(bond_equl):
-						bond_equl.append([k1,k2])
+						bond_equl_oth.append([k1,k2])
+					elif pair_cmp_list(v1,v2,symidx_hvy,symidx_ch2):
+						bond_equl_ch2.append([k1,k2])
+					elif pair_cmp_list(v1,v2,symidx_ch2,symidx_hvy):
+						bond_equl_h2c.append([k1,k2])
+					elif pair_cmp_list(v1,v2,symidx_hvy,symidx_ch3):
+						bond_equl_ch3.append([k1,k2])
+					elif pair_cmp_list(v1,v2,symidx_ch3,symidx_hvy):
+						bond_equl_h3c.append([k1,k2])
 					#elif 
 		#print('## bond_equl')
 		#print(bond_equl)
-		b_sym = {}
-		for b_eq in bond_equl:
-			b_sym[b_eq[0]]=[]
-		for b_eq in bond_equl:
-			b_sym[b_eq[0]].append(b_eq[1])
-		#print(b_sym)
+		b_sym_ch2 = {}
+		b_sym_h2c = {}
+		b_sym_ch3 = {}
+		b_sym_h3c = {}
+		b_sym_oth = {}
+		for b_eq in bond_equl_ch2:
+			b_sym_ch2[b_eq[0]]=[]
+		for b_eq in bond_equl_ch2:
+			b_sym_ch2[b_eq[0]].append(b_eq[1])
+
+		for b_eq in bond_equl_h2c:
+			b_sym_h2c[b_eq[0]]=[]
+		for b_eq in bond_equl_h2c:
+			b_sym_h2c[b_eq[0]].append(b_eq[1])
+
+		for b_eq in bond_equl_ch3:
+			b_sym_ch3[b_eq[0]]=[]
+		for b_eq in bond_equl_ch3:
+			b_sym_ch3[b_eq[0]].append(b_eq[1])
+
+		for b_eq in bond_equl_h3c:
+			b_sym_h3c[b_eq[0]]=[]
+		for b_eq in bond_equl_h3c:
+			b_sym_h3c[b_eq[0]].append(b_eq[1])
+
+		for b_eq in bond_equl_oth:
+			b_sym_oth[b_eq[0]]=[]
+		for b_eq in bond_equl_oth:
+			b_sym_oth[b_eq[0]].append(b_eq[1])
+
+		#print('BOND SYM',b_sym)
 		# some equivalent info is redundant, so trim the info. 
-		b_sym_trim = {}
-		for k,v in b_sym.items():
-			if k not in flatten_list(b_sym.values()):
-				b_sym_trim[k]=v
-		#print(b_sym_trim)
+		b_sym_trim_ch2 = {}
+		for k,v in b_sym_ch2.items():
+			if k not in flatten_list(b_sym_ch2.values()):
+				b_sym_trim_ch2[k]=v
+
+		b_sym_trim_h2c = {}
+		for k,v in b_sym_h2c.items():
+			if k not in flatten_list(b_sym_h2c.values()):
+				b_sym_trim_h2c[k]=v
+
+		b_sym_trim_ch3 = {}
+		for k,v in b_sym_ch3.items():
+			if k not in flatten_list(b_sym_ch3.values()):
+				b_sym_trim_ch3[k]=v
+
+		b_sym_trim_h3c = {}
+		for k,v in b_sym_h3c.items():
+			if k not in flatten_list(b_sym_h3c.values()):
+				b_sym_trim_h3c[k]=v
+
+		b_sym_trim_oth = {}
+		for k,v in b_sym_oth.items():
+			if k not in flatten_list(b_sym_oth.values()):
+				b_sym_trim_oth[k]=v
+		#print('BOND SYM TRIM',b_sym_trim_ch2, b_sym_trim_ch3, b_sym_trim_oth)
 		#idx_dip = 0
 		for i,in1_d in enumerate(in1_idx_dipole):
-			for k,v in b_sym_trim.items():
+			for k,v in b_sym_trim_ch2.items():
+				if i==k:
+					for x in v:
+						in1_idx_dipole[x] = k+1
+			for k,v in b_sym_trim_ch3.items():
+				if i==k:
+					for x in v:
+						in1_idx_dipole[x] = k+1
+			for k,v in b_sym_trim_oth.items():
 				if i==k:
 					for x in v:
 						in1_idx_dipole[x] = k+1
 
 		for i,in2_d in enumerate(in2_idx_dipole):
-			for k,v in b_sym_trim.items():
+			for k,v in b_sym_trim_ch2.items():
+				if i==k:
+					in2_idx_dipole[i] = 0
+					for x in v:
+						in2_idx_dipole[x] = k+1
+			for k,v in b_sym_trim_h2c.items():
+				if i==k:
+					in2_idx_dipole[i] = 0
+					for x in v:
+						in2_idx_dipole[x] = k+1
+			for k,v in b_sym_trim_ch3.items():
+				if i==k:
+					in2_idx_dipole[i] = 0
+					for x in v:
+						in2_idx_dipole[x] = k+1
+			for k,v in b_sym_trim_h3c.items():
 				if i==k:
 					in2_idx_dipole[i] = 0
 					for x in v:
