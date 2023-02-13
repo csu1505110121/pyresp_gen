@@ -12,14 +12,15 @@ def main_run(espdat,Istage,IIstage,\
 				QWTw,QWTs,PWTw,PWTs,\
 				EXC12,EXC13,\
 				DEPTH,\
-				verbose):
+				verbose,\
+				strategy):
 	if Istage and IIstage:
-		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose)
-		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,0)
+		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose,strategy)
+		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,0,strategy)
 	elif len(Istage) !=0 and len(IIstage) == 0:
-		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose)
+		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose,strategy)
 	elif len(Istage) ==0 and len(IIstage) != 0:
-		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,verbose)
+		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,verbose,strategy)
 	else:
 		print('Please specify one or two stage input file name with option --Istage or --IIstage')
 
@@ -40,6 +41,7 @@ parser.add_argument('--EXC12','-exc12',type=int,help='include (0) or exclude (1)
 parser.add_argument('--EXC13','-exc13',type=int,help='include (0) or exclude (1) 1-3 interaction',default=0)
 parser.add_argument('--DEPTH','-depth',type=int,help='Maximum depth for searching equilvalance atoms',default=3)
 parser.add_argument('--verbose','-v',type=int,help='Print verbose information',default=0)
+parser.add_argument('--strategy','-strategy',type=int,help='Choose Strategy for pGM-perm',default=2)
 
 
 args = parser.parse_args()
@@ -52,7 +54,8 @@ if __name__ == '__main__':
 						args.QWTw,args.QWTs,args.PWTw,args.PWTs,\
 						args.EXC12,args.EXC13,\
 						args.DEPTH,\
-						args.verbose)
+						args.verbose,\
+						args.strategy)
 	except Exception as e:
 		print(e)
 		

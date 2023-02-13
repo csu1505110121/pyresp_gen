@@ -15,7 +15,7 @@ def dumpin1(espdat,outfile,\
 				nmol=1,charge=0,\
 				qwt=0.0005,pwt=0.0005,\
 				exc12=0,exc13=0,\
-				depth=3,verbose=1):
+				depth=3,verbose=1,strategy=2):
 	# specify the output file name and notes in the input file
 	#ifile = espdat.split('/')[-1].split('.')[0]+'.1st'
 	note = espdat.split('/')[-1].split('.')[0]
@@ -33,7 +33,7 @@ def dumpin1(espdat,outfile,\
 	equAtmMap = getEQU(connect,xyzs,depth=depth)
 	idx_ch2, idx_ch3 = getCH2CH3(conIdx, xyzs)
 	sym_hvy, sym_ch2, sym_ch3,sym_hxx = getSymIdx(equAtmMap, xyzs, idx_ch2, idx_ch3, connect)
-	in1_idx, in2_idx,in1_idx_dipole, in2_idx_dipole = dumpSymIdx(sym_hvy, sym_ch2, sym_ch3,sym_hxx, idx_ch2, idx_ch3, xyzs,connect,ptype)
+	in1_idx, in2_idx,in1_idx_dipole, in2_idx_dipole = dumpSymIdx(sym_hvy, sym_ch2, sym_ch3,sym_hxx, idx_ch2, idx_ch3, xyzs,connect,ptype,strategy)
 	
 	if verbose:
 		print('#{:60s}#'.format('-'*60))
@@ -151,7 +151,7 @@ def dumpin1(espdat,outfile,\
 		# For the 1st stage, hydrogens are all not restrained
 		f.write('{:<10s} \t= {:>6d},\n'.format('ihfree',1))
 		# For the 1st stage, restraint weight for charges set to be 0.0005
-		f.write('{:<10s} \t= {:>6.4f},\n'.format('qwt',qwt))
+		f.write('{:<10s} \t= {:>6.5f},\n'.format('qwt',qwt))
 		# For the 1st stage, write restart info of new esp to -s unit
 		f.write('{:<10s} \t= {:>6d},\n'.format('ioutopt',1))
 		
@@ -180,7 +180,7 @@ def dumpin1(espdat,outfile,\
 		elif ptype == 'perm':
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',1))
-			f.write('{:<10s} \t= {:>6.4f},\n'.format('pwt',pwt))
+			f.write('{:<10s} \t= {:>6.5f},\n'.format('pwt',pwt))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))
@@ -240,7 +240,7 @@ def dumpin2(espdat,outfile,\
 				nmol=1,charge=0,\
 				qwt=0.001,pwt=0.0005,\
 				exc12=0,exc13=0,\
-				depth=3,verbose=0):
+				depth=3,verbose=0,strategy=2):
 	# specify the output file name and notes in the input file
 	#ifile = espdat.split('/')[-1].split('.')[0]+'.1st'
 	note = espdat.split('/')[-1].split('.')[0]
@@ -258,7 +258,7 @@ def dumpin2(espdat,outfile,\
 	equAtmMap = getEQU(connect,xyzs,depth=depth)
 	idx_ch2, idx_ch3 = getCH2CH3(conIdx, xyzs)
 	sym_hvy, sym_ch2, sym_ch3, sym_hxx = getSymIdx(equAtmMap, xyzs, idx_ch2, idx_ch3, connect)
-	in1_idx, in2_idx, in1_idx_dipole, in2_idx_dipole = dumpSymIdx(sym_hvy, sym_ch2, sym_ch3, sym_hxx, idx_ch2, idx_ch3, xyzs,connect,ptype)
+	in1_idx, in2_idx, in1_idx_dipole, in2_idx_dipole = dumpSymIdx(sym_hvy, sym_ch2, sym_ch3, sym_hxx, idx_ch2, idx_ch3, xyzs,connect,ptype,strategy)
 
 
 	if verbose:
@@ -360,7 +360,7 @@ def dumpin2(espdat,outfile,\
 		f.write('{:<10s} \t= {:>6d},\n'.format('ihfree',1))
 		# For the 2nd stage, restraint weight for charges set to be 0.001 (st: strong restraint)
 		# 			see J. Am. Chem. Soc. (1993) 115, 21
-		f.write('{:<10s} \t= {:>6.4f},\n'.format('qwt',qwt))
+		f.write('{:<10s} \t= {:>6.5f},\n'.format('qwt',qwt))
 		# For the 1st stage, write restart info of new esp to -s unit
 		f.write('{:<10s} \t= {:>6d},\n'.format('ioutopt',1))
 		
@@ -388,7 +388,7 @@ def dumpin2(espdat,outfile,\
 		elif ptype == 'perm':
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',1))
-			f.write('{:<10s} \t= {:>6.4f},\n'.format('pwt',pwt))
+			f.write('{:<10s} \t= {:>6.5f},\n'.format('pwt',pwt))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))

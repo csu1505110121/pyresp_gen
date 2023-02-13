@@ -497,7 +497,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							symidx_hxx.append([i,j])
 	return symidx_hvy,symidx_ch2,symidx_ch3,symidx_hxx
 
-def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='chg'):
+def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='chg',strategy=2):
 	in1_idx = np.zeros(len(xyz['ida']))
 	in2_idx = [-1 for x in range(len(xyz['ida']))]
 	in1_idx_dipole = [0 for k,v in conn.items() for x in v]
@@ -618,6 +618,10 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 
 		# find bond equivalent info. with the help of symidx_hvy, symidx_ch2, symidx_ch3, and symidx_hxx
 		#   the assumption is that, if any two is equivalent, then bond formed between them should be equivalent
+		# split bond_equl to the following categories:
+		#  -CH2- : 	x C->H  -CH3: o C->H  oth: x HVY-HVY
+		#			X H->C		  o H->C       x HVY-HXX
+		#						               x HXX-HVY
 		bond_equl_ch2 = []
 		bond_equl_h2c = []
 		bond_equl_ch3 = []
@@ -745,6 +749,24 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 				if i==k:
 					for x in v:
 						in1_idx_dipole[x] = k+1
+			#****************************Cautions******************************#
+			# following two loops just for the test the accuracy of strategy II
+			# where in 1st and 2nd strategy, equivalence of C-H and H-C of -CH3
+			# and -CH2- are both maintained
+			# when test is done, this command should be commented out!!!!
+			#-Test show that Accuracy of Strategy II is better than Strategy I.
+			#-In following version, the default strategy is II.
+			#******************************************************************#
+			if strategy==2:
+				#print('*****THIS VERSION IS A TEST VERSION*****')
+				for k,v in b_sym_trim_h2c.items():
+					if i==k:
+						for x in v:
+							in1_idx_dipole[x] = k+1
+				for k,v in b_sym_trim_h3c.items():
+					if i==k:
+						for x in v:
+							in1_idx_dipole[x] = k+1
 
 		for i,in2_d in enumerate(in2_idx_dipole):
 			for k,v in b_sym_trim_ch2.items():
