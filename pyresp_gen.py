@@ -9,18 +9,18 @@ from prepin import dumpin1, dumpin2
 def main_run(espdat,Istage,IIstage,\
 				ptype,dtype,\
 				nmol,charge,\
-				QWTw,QWTs,PWTw,PWTs,\
+				QWT1,QWT2,PWT1,PWT2,\
 				EXC12,EXC13,\
 				DEPTH,\
 				verbose,\
 				strategy):
 	if Istage and IIstage:
-		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose,strategy)
-		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,0,strategy)
+		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWT1,PWT1,EXC12,EXC13,DEPTH,verbose,strategy)
+		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWT2,PWT2,EXC12,EXC13,DEPTH,0,strategy)
 	elif len(Istage) !=0 and len(IIstage) == 0:
-		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWTw,PWTw,EXC12,EXC13,DEPTH,verbose,strategy)
+		dumpin1(espdat,Istage,ptype,dtype,nmol,charge,QWT1,PWT1,EXC12,EXC13,DEPTH,verbose,strategy)
 	elif len(Istage) ==0 and len(IIstage) != 0:
-		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWTs,PWTs,EXC12,EXC13,DEPTH,verbose,strategy)
+		dumpin2(espdat,IIstage,ptype,dtype,nmol,charge,QWT2,PWT2,EXC12,EXC13,DEPTH,verbose,strategy)
 	else:
 		print('Please specify one or two stage input file name with option --Istage or --IIstage')
 
@@ -33,10 +33,10 @@ parser.add_argument('--ptype','-p',help='Polarization type: chg | ind | perm ',d
 parser.add_argument('--dtype','-d',help='Damping Function type: (1) applequist | (2) tinker | (3) exponential | (4) linear | (5) pgm',default='pgm')
 parser.add_argument('--nmol','-n',type=int,help='Number of conformations',default=1)
 parser.add_argument('--charge','-q',type=int,help='Total charge for this structure or conformer',default=0)
-parser.add_argument('--QWTw','-qwtw',type=float,help='Charge Constraint 1st stage',default=0.0005)
-parser.add_argument('--QWTs','-qwts',type=float,help='Charge Constraint 2nd stage',default=0.001)
-parser.add_argument('--PWTw','-pwtw',type=float,help='Permanent dipoles Constraint',default=0.0005)
-parser.add_argument('--PWTs','-pwts',type=float,help='Permanent dipoles Constraint',default=0.001)
+parser.add_argument('--QWT1','-qwt1',type=float,help='Charge Constraint 1st stage',default=0.0005)
+parser.add_argument('--QWT2','-qwt2',type=float,help='Charge Constraint 2nd stage',default=0.001)
+parser.add_argument('--PWT1','-pwt1',type=float,help='Permanent dipoles Constraint 1st stage',default=0.0005)
+parser.add_argument('--PWT2','-pwt2',type=float,help='Permanent dipoles Constraint 2nd stage',default=0.001)
 parser.add_argument('--EXC12','-exc12',type=int,help='include (0) or exclude (1) 1-2 interaction',default=0)
 parser.add_argument('--EXC13','-exc13',type=int,help='include (0) or exclude (1) 1-3 interaction',default=0)
 parser.add_argument('--DEPTH','-depth',type=int,help='Maximum depth for searching equilvalance atoms',default=3)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 		main_run(args.espdat,args.Istage,args.IIstage,\
 						args.ptype,args.dtype,\
 						args.nmol,args.charge,\
-						args.QWTw,args.QWTs,args.PWTw,args.PWTs,\
+						args.QWT1,args.QWT2,args.PWT1,args.PWT2,\
 						args.EXC12,args.EXC13,\
 						args.DEPTH,\
 						args.verbose,\
