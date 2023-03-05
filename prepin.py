@@ -11,7 +11,7 @@ import datetime
 
 
 def dumpin1(espdat,outfile,\
-				ptype='chg',dtype='additive',\
+				ptype='perm',dtype='pgm',\
 				nmol=1,charge=0,\
 				qwt=0.0005,pwt=0.0005,\
 				exc12=0,exc13=0,\
@@ -154,47 +154,51 @@ def dumpin1(espdat,outfile,\
 		f.write('{:<10s} \t= {:>6.5f},\n'.format('qwt',qwt))
 		# For the 1st stage, write restart info of new esp to -s unit
 		f.write('{:<10s} \t= {:>6d},\n'.format('ioutopt',1))
-		
-		
-		if ptype=='chg' and dtype=='additive':
+				
+		if ptype=='chg':
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',0))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='applequist':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='tinker':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='exp':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='linear':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype =='ind':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
+		elif ptype=='ind':
+			if dtype=='1': # applequist
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
+			elif dtype=='2': # tinker
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
+			elif dtype=='3': # exponential
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
+			elif dtype=='4': # linear
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
+			else: # pgm
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))
 		elif ptype == 'perm':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
+			if dtype=='1': # applequist
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
+			elif dtype=='2': # tinker
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
+			elif dtype=='3': # exponential
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
+			elif dtype=='4': # linear
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
+			else: # pgm
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',1))
 			f.write('{:<10s} \t= {:>6.5f},\n'.format('pwt',pwt))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))
 			f.write('{:<10s} \t= {:>6d},\n'.format('virtual',0))
-		elif ptype == 'perm-v':
-			f.write('{:<10s} \t= {:>6d},\n'.format('virtual',1))
-			#pass
+		#elif ptype == 'perm-v':
+		#	f.write('{:<10s} \t= {:>6d},\n'.format('virtual',1))
 		else:
 			print('**{:10s}**'.format('TYPE IS NOT RECOGNIZED BY PROGRAM'))
 			print('**{:10s}**'.format('ONLY ACCEPT FOLLOWING TYPES:'))
 			print('x chg')
 			print('x ind')
 			print('x perm')
-			print('x perm-v')
+			#print('x perm-v')
 			f.write('*ERROR*: {:10s}\n'.format('TYPE IS NOT RECOGNIZED'))
 			return None
 		f.write('{:10s}\n'.format('&end'))
@@ -219,7 +223,7 @@ def dumpin1(espdat,outfile,\
 			f.write('{:2d} \t {:3d}\n'.format(charge,info['natoms'])) # charge is specified by user
 			for ida,v in zip(xyzs['ida'].values,in1_idx):
 				f.write('{:2d} \t {:3d}\n'.format(ida,int(v)))
-		elif ptype == 'perm' or ptype == 'perm-v':
+		elif ptype == 'perm':
 			f.write('{:4d} \t {:4d}\t {:4d}\n'.format(charge,info['natoms'],Nbond*2)) # charge is specified by user
 			# dump charge equivalent info.
 			idx_ = 0
@@ -236,7 +240,7 @@ def dumpin1(espdat,outfile,\
 			
 
 def dumpin2(espdat,outfile,\
-				ptype='chg',dtype='additive',\
+				ptype='perm',dtype='pgm',\
 				nmol=1,charge=0,\
 				qwt=0.001,pwt=0.0005,\
 				exc12=0,exc13=0,\
@@ -364,45 +368,50 @@ def dumpin2(espdat,outfile,\
 		# For the 1st stage, write restart info of new esp to -s unit
 		f.write('{:<10s} \t= {:>6d},\n'.format('ioutopt',1))
 		
-		if ptype=='chg' and dtype=='additive':
+		if ptype=='chg':
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',0))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='applequist':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='tinker':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='exp':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype=='chg' and dtype=='linear':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
-		elif ptype =='ind':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
+		elif ptype=='ind':
+			if dtype=='1': # applequist
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
+			elif dtype=='2': # tinker
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
+			elif dtype=='3': # exponential
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
+			elif dtype=='4': # linear
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
+			else: # pgm
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',0))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))
 		elif ptype == 'perm':
-			f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
+			if dtype=='1': # applequist
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',1))
+			elif dtype=='2': # tinker
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',2))
+			elif dtype=='3': # exponential
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',3))
+			elif dtype=='4': # linear
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',4))
+			else: # pgm
+				f.write('{:<10s} \t= {:>6d},\n'.format('ipol',5))
 			f.write('{:<10s} \t= {:>6d},\n'.format('ipermdip',1))
 			f.write('{:<10s} \t= {:>6.5f},\n'.format('pwt',pwt))
 			f.write('{:<10s} \t= {:>6d},\n'.format('igdm',1))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc12',exc12))
 			f.write('{:<10s} \t= {:>6d},\n'.format('exc13',exc13))
 			f.write('{:<10s} \t= {:>6d},\n'.format('virtual',0))
-		elif ptype == 'perm-v':
-			f.write('{:<10s} \t= {:>6d},\n'.format('virtual',1))
-			#pass
+		#elif ptype == 'perm-v':
+		#	f.write('{:<10s} \t= {:>6d},\n'.format('virtual',1))
 		else:
 			print('**{:10s}**'.format('TYPE IS NOT RECOGNIZED BY PROGRAM'))
 			print('**{:10s}**'.format('ONLY ACCEPT FOLLOWING TYPES:'))
 			print('x chg')
 			print('x ind')
 			print('x perm')
-			print('x perm-v')
+			#print('x perm-v')
 			f.write('*ERROR*: {:10s}\n'.format('TYPE IS NOT RECOGNIZED'))
 			return None
 		f.write('{:10s}\n'.format('&end'))
@@ -427,7 +436,7 @@ def dumpin2(espdat,outfile,\
 			f.write('{:2d} \t {:3d}\n'.format(charge,info['natoms'])) # charge is specified by user
 			for ida,v in zip(xyzs['ida'].values,in2_idx):
 				f.write('{:2d} \t {:3d}\n'.format(ida,int(v)))
-		elif ptype == 'perm' or ptype == 'perm-v':
+		elif ptype == 'perm':
 			f.write('{:4d} \t {:4d}\t {:4d}\n'.format(charge,info['natoms'],Nbond*2)) # charge is specified by user
 			# dump charge equivalent info. here
 			idx_ = 0

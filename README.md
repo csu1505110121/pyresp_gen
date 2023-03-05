@@ -49,7 +49,7 @@ Editing the `~/.bashrc` file and adding the same line
 ```
 usage:
 pyresp_gen.py [-h] --espdat ESPDAT [--Istage ISTAGE] [--IIstage IISTAGE] [--ptype PTYPE] [--dtype DTYPE] [--nmol NMOL] [--charge CHARGE] \
-			  [--QWTw QWTW] [--QWTs QWTS] [--PWT PWT] [--EXC12 EXC12] [--EXC13 EXC13] [--DEPTH DEPTH] [--verbose VERBOSE]
+			  [--QWT1 QWT1] [--QWT2 QWT2] [--PWT1 PWT1] [--PWT2 PWT2] [--EXC12 EXC12] [--EXC13 EXC13] [--DEPTH DEPTH] [--verbose VERBOSE]
 ```
 
 For `help` just type `pyresp_gen.py -h` which will show the explanation of each arguments. Here, we explained them in detail.
@@ -59,23 +59,22 @@ For `help` just type `pyresp_gen.py -h` which will show the explanation of each 
 - `-f1` or `--Istage`        : name for the 1st stage input file, if you not specified, default name `pyrespgen.1st` will be applied
 - `-f2` or `--IIstage`       : name for the 2nd stage input file, if you not specified, default name `pyrespgen.2nd` will be applied
 - `-p`  or `--ptype`         : polarization type, in this version, only support 
-								`chg`:point charge model                     <- default one
-								`ind`: induced dipole model 
-								`perm`: permanent dipole model
-								`perm-v`: permanent dipole model virtual
+								`chg`: additive model
+								`ind`: RESP-ind model
+								`perm`: RESP-perm model                   <- default
 - `-d`  or `--dtype`         : Damping function type, in this version supproted types are listed below:
-								`additive`                                    <- default one
-								`applequist`
-								`tinker`
-								`exp`
-								`linear`
+								`(1) applequist`
+								`(2) tinker`
+								`(3) exponential`
+								`(4) linear`
+								`(5) pgm`                                <- default	
 
 - `-nmol` or `--nmol`        : Number of conformations. In this version could only handle one conformation
-- `-q`    or `--charge`      : Total charge for this structure or conformer
-- `-qwtw` or `--QWTw`        : Weak charge constraint in the 1st stage: default is set to be 0.0005
-- `-qwts` or `--QWTs`        : Strong charge constraint in the 2nd stage: defalt is set to be 0.001
-- `-pwtw`  or `--PWTw`       : Weak permanent dipoles constraint
-- `-pwts`  or `--PWTs`       : Strong permanent dipoles constraint
+- `-q`    or `--charge`      : Total charge of this structure or conformer
+- `-qwt1` or `--QWT1`        : Charge restraint in the 1st stage: default is set to be 0.0005
+- `-qwt2` or `--QWT2`        : Charge restraint in the 2nd stage: defalt is set to be 0.001
+- `-pwt1`  or `--PWT1`       : Permanent dipoles restraint in the 1st stage
+- `-pwt2`  or `--PWT2`       : Permanent dipoles restraint in the 2nd stage
 - `-exc12` or `--EXC12`      : including (0) or excluding (1) 1-2 interactions
 - `-exc13` or `--EXC13`      : including (0) or excluding (1) 1-3 interactions
 - `-depth` or `--DEPTH`      : Maximum depth for searching equivalance atoms

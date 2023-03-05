@@ -49,8 +49,8 @@ def getINFO(espdat):
 			if not line:
 				break
 			else:
-				info['natoms'] = int(line.split()[0])
-				info['ngrids'] = int(line.split()[1])
+				info['natoms'] = int(line[0:5])
+				info['ngrids'] = int(line[5:10])
 				break
 	return info
 
@@ -497,7 +497,7 @@ def getSymIdx(equAtm,xyz,idx_ch2,idx_ch3,conn):
 							symidx_hxx.append([i,j])
 	return symidx_hvy,symidx_ch2,symidx_ch3,symidx_hxx
 
-def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='chg',strategy=2):
+def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3, xyz, conn,ptype='perm',strategy=2):
 	in1_idx = np.zeros(len(xyz['ida']))
 	in2_idx = [-1 for x in range(len(xyz['ida']))]
 	in1_idx_dipole = [0 for k,v in conn.items() for x in v]
@@ -555,7 +555,7 @@ def dumpSymIdx(symidx_hvy, symidx_ch2, symidx_ch3, symidx_hxx, idx_ch2, idx_ch3,
 				in2_idx[hvy[1]] = hvy[0]+1
 		return in1_idx,in2_idx, in1_idx_dipole, in2_idx_dipole
 
-	elif ptype=='perm' or ptype=='perm-v':
+	elif ptype=='perm':
 		# define the equivalent index in the 1st file 
 		#		for hydrogen atoms not involved in -CH2- -CH3
 		for h in symidx_hxx:
