@@ -366,7 +366,7 @@ def getEQU(connect,xyz,depth=2):
 	"""
 	connectAtm = {}
 	# constructing tree depth
-	for i in range(1,depth):
+	for layer in range(1,depth):
 		connect_tmp = {}
 		for i in connect.keys():
 			tmp = [connect[x] for x in connect[i]]
