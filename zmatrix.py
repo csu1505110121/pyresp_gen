@@ -111,14 +111,14 @@ def getBOND(xyz,dtbl=tbl): # No need for cutoff again
 						if ref > ref_range[num_i] and ref <= ref_range[num_i+1]:
 							offsetfact = bnl_offset_fact[num_i]
 							offset = ref*offsetfact
-							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+							if dmat.iloc[i,j] < ref + offset and dmat.iloc[i,j] > ref * 0.5:
 								#print('Atom {} - Atom {}'.format(i,j))
 								Nbond+=1
 					else:
 						if ref > ref_range[num_i]:
 							offsetfact = bnl_offset_fact[num_i]
 							offset = ref*offsetfact
-							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+							if dmat.iloc[i,j] < ref + offset and dmat.iloc[i,j] > ref * 0.5:
 								#print('Atom {} - Atom {}'.format(i,j))
 								Nbond+=1
 				
@@ -235,7 +235,7 @@ def getCONN(xyz,dtbl=tbl): # No need for cutoff again
 						if ref > ref_range[num_i] and ref <= ref_range[num_i+1]:
 							offsetfact = bnl_offset_fact[num_i]
 							offset = ref*offsetfact
-							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+							if dmat.iloc[i,j] < ref + offset and dmat.iloc[i,j] > ref * 0.5:
 								connect[i].append(j)
 								conAtm[i].append(mapAtmType[j])
 								conIdx[i].append(mapAtmIdx[mapAtmType[j]])
@@ -243,7 +243,7 @@ def getCONN(xyz,dtbl=tbl): # No need for cutoff again
 						if ref > ref_range[num_i]:
 							offsetfact = bnl_offset_fact[num_i]
 							offset = ref*offsetfact
-							if dmat.iloc[i][j] < ref + offset and dmat.iloc[i][j] > ref * 0.5:
+							if dmat.iloc[i,j] < ref + offset and dmat.iloc[i,j] > ref * 0.5:
 								connect[i].append(j)
 								conAtm[i].append(mapAtmType[j])
 								conIdx[i].append(mapAtmIdx[mapAtmType[j]])
